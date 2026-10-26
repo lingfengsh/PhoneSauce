@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PraatSauce 助手：从双击到出表的完整流程（附代码教程）</title>
+<style>
+  :root{
+    --bg:#f6f7f9; --card:#ffffff; --ink:#1f2933; --ink2:#52606d; --ink3:#7b8794;
+    --line:#e4e7eb; --brand:#0f766e; --brand-soft:#e6f4f1;
+    --warn:#b45309; --warn-bg:#fffbeb; --warn-line:#f59e0b;
+    --info:#1d4ed8; --info-bg:#eff6ff; --info-line:#93c5fd;
+    --code-bg:#f8fafc; --code-line:#e2e8f0;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;
+    font-size:16px; line-height:1.85;
+  }
+  .wrap{display:flex; max-width:1280px; margin:0 auto; align-items:flex-start}
+  /* ---------- 侧栏目录 ---------- */
+  aside{
+    position:sticky; top:0; width:268px; flex:0 0 268px;
+    height:100vh; overflow:auto; padding:28px 18px 40px 24px;
+    border-right:1px solid var(--line); background:#fbfcfd;
+  }
+  aside .brand{font-weight:700; font-size:15px; color:var(--brand); letter-spacing:.4px}
+  aside .sub{font-size:12px; color:var(--ink3); margin:4px 0 18px}
+  aside a{display:block; color:var(--ink2); text-decoration:none; font-size:13.5px; padding:5px 10px; border-radius:6px; line-height:1.5}
+  aside a:hover{background:var(--brand-soft); color:var(--brand)}
+  aside a.lv2{padding-left:22px; font-size:13px; color:var(--ink3)}
+  /* ---------- 正文 ---------- */
+  main{flex:1; min-width:0; padding:40px 46px 120px}
+  h1{font-size:30px; line-height:1.35; margin:0 0 8px; letter-spacing:-.3px}
+  .lede{color:var(--ink2); font-size:16px; margin:0 0 6px}
+  .meta{color:var(--ink3); font-size:13px; margin-bottom:38px}
+  h2{font-size:22px; margin:54px 0 14px; padding-bottom:9px; border-bottom:2px solid var(--brand-soft)}
+  h3{font-size:17px; margin:30px 0 8px; color:var(--brand)}
+  h4{font-size:15px; margin:20px 0 6px}
+  p{margin:10px 0}
+  ul,ol{margin:10px 0 10px 22px; padding:0}
+  li{margin:5px 0}
+  code{background:#eef2f6; padding:1px 5px; border-radius:4px; font-size:.9em;
+       font-family:"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace}
+  pre.code{
+    background:var(--code-bg); border:1px solid var(--code-line); border-radius:8px;
+    padding:14px 16px; overflow:auto; font-size:13px; line-height:1.7; margin:12px 0;
+    font-family:"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
+  }
+  pre.code .cm{color:#6b7280}
+  table{border-collapse:collapse; width:100%; margin:14px 0; font-size:14px; background:var(--card)}
+  th,td{border:1px solid var(--line); padding:9px 11px; text-align:left; vertical-align:top}
+  th{background:#f1f5f9; font-weight:600; color:var(--ink)}
+  tbody tr:nth-child(even){background:#fafbfc}
+  .box{border-radius:8px; padding:14px 16px; margin:16px 0; font-size:14.5px}
+  .box .t{font-weight:700; display:block; margin-bottom:4px; font-size:14px}
+  .metaphor{background:var(--warn-bg); border-left:4px solid var(--warn-line)}
+  .metaphor .t{color:var(--warn)}
+  .note{background:var(--info-bg); border-left:4px solid var(--info-line)}
+  .note .t{color:var(--info)}
+  .key{background:var(--brand-soft); border-left:4px solid var(--brand)}
+  .key .t{color:var(--brand)}
+  .fig{background:var(--card); border:1px solid var(--line); border-radius:10px; padding:18px; margin:22px 0}
+  .figcap{font-size:12.5px; color:var(--ink3); text-align:center; margin-top:8px}
+  hr{border:0; border-top:1px solid var(--line); margin:40px 0}
+  .tag{display:inline-block; font-size:12px; padding:1px 7px; border-radius:999px;
+       background:var(--brand-soft); color:var(--brand); margin-right:6px; vertical-align:1px}
+  .file{font-size:12.5px; color:var(--ink3); font-family:Consolas,monospace}
+  @media (max-width:900px){
+    aside{display:none}
+    main{padding:24px 18px 80px}
+    h1{font-size:24px}
+  }
+  @media print{
+    aside{display:none}
+    body{background:#fff}
+    main{padding:0}
+    h2{page-break-after:avoid}
+    pre.code{page-break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<aside>
+  <div class="brand">PraatSauce 助手</div>
+  <div class="sub">完整流程与代码教程</div>
+  <a href="#how">这份文档怎么读</a>
+  <a href="#all">1. 一句话看清全貌</a>
+  <a href="#boot">2. 启动：双击之后发生了什么</a>
+  <a href="#ui">3. 界面：五个抽屉</a>
+  <a href="#schema">4. 参数：整个软件的"菜单"</a>
+  <a href="#csv">5. 翻译：把选项写成点菜单</a>
+  <a href="#readparams">6. Praat 怎么读懂这张单子</a>
+  <a href="#exec">7. 批量执行：一个任务的完整生命周期</a>
+  <a href="#praat">8. Praat 内部：一个音频怎么被拆开测</a>
+  <a href="#results">9. 结果层：怎么判断测得准不准</a>
+  <a href="#review">10. 复核：九宫格与人工修正</a>
+  <a href="#export">11. 导出：最后一道工序</a>
+  <a href="#flow">12. 把整条链路串起来</a>
+  <a href="#patterns">13. 可以偷学的 12 个工程套路</a>
+  <a href="#route">14. 代码导读路线</a>
+  <a href="#issues">15. 读代码发现的两处值得注意</a>
+  <a href="#glossary">16. 小词典</a>
+</aside>
+
+<main>
+
+<h1>PraatSauce 助手：从双击到出表的完整流程</h1>
+<p class="lede">写给"懂语音、但不太写程序"的人。全程用生活化的比喻，但每个细节都对得上代码。</p>
+<p class="meta">对应版本 1.2 · 代码位置 <code>ps-shell/</code> 与 <code>scripts/</code> · 文中引用的行号以当前仓库为准</p>
+
+<!-- ============================================================ -->
+<h2 id="how">这份文档怎么读</h2>
+
+<p>三种读法，按你的时间挑：</p>
+<table>
+  <thead><tr><th style="width:22%">你的目的</th><th>读哪几节</th><th style="width:20%">大约需要</th></tr></thead>
+  <tbody>
+    <tr><td>先弄明白这软件在干嘛</td><td>第 1 节 + 第 12 节（两张图）</td><td>10 分钟</td></tr>
+    <tr><td>想知道某个功能是怎么实现的</td><td>看目录，直接跳到对应章节；每节都是"做什么 → 怎么做 → 为什么这么设计"</td><td>按需</td></tr>
+    <tr><td>想借这个项目学写代码</td><td>第 13 节给了一条阅读顺序，第 14 节是现成的例子</td><td>一个周末</td></tr>
+  </tbody>
+</table>
+
+<div class="box note">
+  <span class="t">先约定一个说法</span>
+  下文把"你"在界面上看到的窗口叫 <b>前台</b>，把 Python 写的那一层叫 <b>后台</b>，把真正做计算的 <code>praat.exe</code> 叫 <b>化验室</b>。
+  这三个词不是术语，只是为了让后面的叙述有个抓手。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="all">1. 一句话看清全貌</h2>
+
+<p><b>这个软件自己不做任何声学计算。</b>它只做三件事：</p>
+<ol>
+  <li>把你点的几个选项，翻译成 Praat 认识的参数表（<code>params.csv</code>）；</li>
+  <li>启动 <code>praat.exe</code>，让它去跑 <code>praatSauce.praat</code>；</li>
+  <li>把 Praat 吐出来的大表，翻译成人能看的曲线、诊断和导出文件。</li>
+</ol>
+
+<p>真正的算法（基频、共振峰、谐波幅度、HNR、CPP……）全部来自上游项目 <b>praatSauce 1.0.8</b>，作者是 James Kirby 和 Rasmus Puggaard-Rode。这个壳子的价值不在算法，而在<b>把 55 个参数、一堆路径和 Praat 的怪脾气，包装成五步向导</b>。</p>
+
+<h3>三层分工</h3>
+<table>
+  <thead><tr><th style="width:12%">层</th><th style="width:18%">代码在哪</th><th style="width:16%">角色</th><th>负责什么</th><th style="width:20%">绝不做什么</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>前台</td><td class="file">ps-shell/ui/</td><td>挂号台 / 问卷</td>
+      <td>显示、收集选项、画曲线、翻页</td><td>不读文件、不算数、不碰 Praat</td>
+    </tr>
+    <tr>
+      <td>后台</td><td class="file">ps-shell/backend/</td><td>护士 / 调度员</td>
+      <td>校验参数、写单子、起进程、读结果、做诊断</td><td>不做信号处理</td>
+    </tr>
+    <tr>
+      <td>化验室</td><td class="file">praat.exe + scripts/*.praat</td><td>检验科</td>
+      <td>真正算 F0、共振峰、谐波、噪声</td><td>不知道界面存在，只认参数文件</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="box metaphor">
+  <span class="t">比喻：体检中心</span>
+  你到体检中心，先在前台填问卷（<b>界面</b>）；护士把你的要求誊到一张检验申请单上（<b>params.csv</b>），
+  然后把你领到抽血窗口（<b>Praat</b>）；化验室只认那张单子，不认你说了什么；
+  报告出来后，护士先帮你核对一遍有没有明显异常（<b>诊断</b>），
+  再由医生抽查几张片子（<b>九宫格复核</b>）；最后装订成册交给你（<b>导出</b>）。
+</div>
+
+<div class="fig">
+<svg viewBox="0 0 900 250" width="100%" height="250" role="img" aria-label="整体数据流示意">
+  <defs>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="3.2" orient="auto">
+      <path d="M0,0 L7,3.2 L0,6.4 z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <g font-family="Microsoft YaHei, sans-serif" font-size="12.5" text-anchor="middle">
+    <!-- 站 1 -->
+    <rect x="14" y="70" width="112" height="62" rx="8" fill="#e6f4f1" stroke="#0f766e"/>
+    <text x="70" y="96" fill="#0f766e" font-weight="700">① 选音频</text>
+    <text x="70" y="116" fill="#52606d" font-size="11">扫描目录 / 配对标注</text>
+    <!-- 站 2 -->
+    <rect x="146" y="70" width="112" height="62" rx="8" fill="#e6f4f1" stroke="#0f766e"/>
+    <text x="202" y="96" fill="#0f766e" font-weight="700">② 定参数</text>
+    <text x="202" y="116" fill="#52606d" font-size="11">预设 + 55 个开关</text>
+    <!-- 站 3 -->
+    <rect x="278" y="70" width="112" height="62" rx="8" fill="#e6f4f1" stroke="#0f766e"/>
+    <text x="334" y="96" fill="#0f766e" font-weight="700">③ 批量运行</text>
+    <text x="334" y="116" fill="#52606d" font-size="11">试跑 → 整批</text>
+    <!-- 站 4 -->
+    <rect x="410" y="70" width="112" height="62" rx="8" fill="#fff7ed" stroke="#f59e0b"/>
+    <text x="466" y="96" fill="#b45309" font-weight="700">④ 复核</text>
+    <text x="466" y="116" fill="#52606d" font-size="11">九宫格 + 详情</text>
+    <!-- 站 5 -->
+    <rect x="542" y="70" width="112" height="62" rx="8" fill="#e6f4f1" stroke="#0f766e"/>
+    <text x="598" y="96" fill="#0f766e" font-weight="700">⑤ 导出</text>
+    <text x="598" y="116" fill="#52606d" font-size="11">CSV / XLSX</text>
+    <!-- 站 6 -->
+    <rect x="674" y="70" width="112" height="62" rx="8" fill="#eef2ff" stroke="#6366f1"/>
+    <text x="730" y="96" fill="#4338ca" font-weight="700">你的统计软件</text>
+    <text x="730" y="116" fill="#52606d" font-size="11">R / Python / Excel</text>
+
+    <!-- 箭头 -->
+    <g stroke="#64748b" stroke-width="1.4" fill="none">
+      <path d="M126,101 L142,101" marker-end="url(#ar)"/>
+      <path d="M258,101 L274,101" marker-end="url(#ar)"/>
+      <path d="M390,101 L406,101" marker-end="url(#ar)"/>
+      <path d="M522,101 L538,101" marker-end="url(#ar)"/>
+      <path d="M654,101 L670,101" marker-end="url(#ar)"/>
+    </g>
+
+    <!-- 下方：真正干活的 Praat -->
+    <rect x="278" y="176" width="244" height="52" rx="8" fill="#f8fafc" stroke="#94a3b8" stroke-dasharray="4 3"/>
+    <text x="400" y="198" fill="#334155" font-weight="700">praat.exe + praatSauce.praat</text>
+    <text x="400" y="216" fill="#64748b" font-size="11">唯一的计算者（子进程）</text>
+    <path d="M334,136 L334,172" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#ar)" fill="none"/>
+    <path d="M466,172 L466,140" stroke="#94a3b8" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#ar)" fill="none"/>
+    <text x="250" y="160" fill="#7b8794" font-size="11" text-anchor="end">params.csv ↓</text>
+    <text x="560" y="160" fill="#7b8794" font-size="11" text-anchor="start">out.tsv ↑</text>
+  </g>
+</svg>
+<div class="figcap">图 1：五个步骤与唯一真正干活的 Praat。界面只负责收集与展示，计算全在下面那个框里。</div>
+</div>
+
+<div class="box key">
+  <span class="t">这一节你该记住的</span>
+  这个软件是<b>翻译官 + 调度员</b>，不是分析算法。你以后遇到任何"结果不对"的问题，第一步都该问：
+  是<b>单子写错了</b>（参数），还是<b>化验室做错了</b>（Praat 参数/版本），还是<b>报告读错了</b>（统计口径）？这三层对应完全不同的排查方向。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="boot">2. 启动：双击之后发生了什么</h2>
+
+<p class="file">对应文件：ps-shell/app.py（248 行）</p>
+
+<p>双击 <code>PraatSauceShell.exe</code>（或源码态跑 <code>python ps-shell/app.py</code>），程序走四步：</p>
+
+<pre class="code">settings.ensure_dirs()                 <span class="cm"># 1. 准备目录</span>
+srv = server.start_server(0)           <span class="cm"># 2. 起一个只监听本机的服务</span>
+port = srv.server_address[1]           <span class="cm">#    端口是系统临时分配的</span>
+url = f"http://127.0.0.1:{port}/launch.html"   <span class="cm"># 3. 拼出地址</span>
+mode = "window" if getattr(sys, "frozen", False) else "browser"  <span class="cm"># 4. 选窗口还是浏览器</span>
+</pre>
+
+<h3>2.1 为什么端口写 0</h3>
+<p><code>start_server(0)</code> 里的 0 不是"第 0 号端口"，而是告诉操作系统：<b>随便给我一个空着的端口</b>。这样不会撞上你电脑上已经跑着的其他服务。真正的端口号启动后才拿到，所以地址是拼出来的，不是写死的。</p>
+
+<h3>2.2 为什么是 127.0.0.1</h3>
+<p>127.0.0.1 是"本机回环地址"，只有这台电脑自己能访问。换成 0.0.0.0 就意味着同一局域网里的人也能打开你的界面——对于一个能读写你硬盘文件、还能启动进程的程序来说，这是不能接受的。</p>
+
+<h3>2.3 三级兜底：窗口起不来怎么办</h3>
+<table>
+  <thead><tr><th style="width:26%">顺位</th><th>做法</th><th style="width:36%">什么时候会退到下一级</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>pywebview + WebView2 独立窗口</td><td>没装 WebView2 运行时、或 pywebview 导入失败</td></tr>
+    <tr><td>2</td><td>Edge 的"应用窗口"（<code>--app=</code>，没有地址栏）</td><td>找不到 msedge.exe</td></tr>
+    <tr><td>3</td><td>系统默认浏览器</td><td>前面都失败；此时会弹一个系统消息框说明原因</td></tr>
+  </tbody>
+</table>
+
+<div class="box metaphor">
+  <span class="t">比喻</span>
+  这就像去一家只收现金的店：先试刷卡，刷不了试扫码，都不行才让你去隔壁取钱。目的只有一个——<b>别让用户双击之后"什么都没发生"</b>。
+</div>
+
+<p>源码态（你在仓库里跑）默认走浏览器，是为了改完界面刷新就见效；打包后的 exe 默认走窗口，是因为对方的电脑上装的是 360、QQ 浏览器还是旧版 IE，你控制不了。</p>
+
+<h3>2.4 浏览器模式下的"心跳"</h3>
+<p>浏览器模式有个副作用：你关掉标签页，Python 进程还活着，任务管理器里就多一个孤儿进程。解决办法很土但有效——页面每 5 秒给后台报一次"我还在"，后台发现超过 60 秒没动静就自己退出：</p>
+
+<pre class="code">IDLE_TIMEOUT = 60
+while True:
+    time.sleep(5)
+    if time.time() - server.LAST_PING["t"] &gt; IDLE_TIMEOUT:
+        break        <span class="cm"># 关标签页 60 秒后，服务自行退出</span>
+</pre>
+
+<h3>2.5 门禁：为什么本地网页还要令牌</h3>
+<p>你打开任何一个网页，那个网页都能向 <code>127.0.0.1</code> 发请求。如果这个本地服务不设防，恶意网页就能悄悄让你的电脑跑一批 Praat、甚至读写文件。所以启动页 <code>launch.html</code> 会先给你种一张"门禁卡"（Cookie <code>PS-Token</code>），之后每个请求都必须带着它。后台每次先查三样东西：</p>
+
+<pre class="code">host = (self.headers.get("Host") or "").rsplit(":", 1)[0]
+if host not in ("127.0.0.1", "localhost"): return False   <span class="cm"># 防 DNS rebinding</span>
+
+origin = self.headers.get("Origin")
+if origin and urlparse(origin).hostname not in ("127.0.0.1", "localhost"): return False
+
+tok = self.headers.get("X-PS-Token") or cookie 里的 PS-Token
+return tok == TOKEN
+</pre>
+
+<div class="box key">
+  <span class="t">这一节你该记住的</span>
+  "本地网页应用"不是网站。它借浏览器当画布，数据和计算全在你自己的电脑上。
+  端口随机 + 只绑本机 + 请求带令牌，是这类程序的三条基本安全线。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="ui">3. 界面：五个抽屉</h2>
+
+<p class="file">对应文件：ps-shell/ui/index.html（约 1900 行）、app.js（约 3600 行）</p>
+
+<p>整个界面没有用 React、Vue 这类框架，就是一个 HTML 文件加一堆原生 JavaScript。五个步骤在 HTML 里就是五个 <code>&lt;section class="step-panel"&gt;</code>，它们是同时存在的，只是被 CSS 藏起来了。</p>
+
+<pre class="code">&lt;section class="step-panel" data-panel="1"&gt; ... 选音频 ... &lt;/section&gt;
+&lt;section class="step-panel" data-panel="2"&gt; ... 要测什么 ... &lt;/section&gt;
+&lt;section class="step-panel" data-panel="3"&gt; ... 批量运行 ... &lt;/section&gt;
+&lt;section class="step-panel" data-panel="4"&gt; ... 查看结果 ... &lt;/section&gt;
+&lt;section class="step-panel" data-panel="5"&gt; ... 导出数据 ... &lt;/section&gt;
+</pre>
+
+<h3>3.1 翻页只做三件事</h3>
+<p>控制翻页的函数叫 <code>setStep(n)</code>，一共三十来行，核心就三句：</p>
+
+<pre class="code">function setStep(n) {
+  state.step = n;
+
+  <span class="cm">// 1. 只显示第 n 个抽屉</span>
+  $$(".step-panel").forEach(p =&gt; p.classList.toggle("hidden", +p.dataset.panel !== n));
+
+  <span class="cm">// 2. 点亮左侧步骤条，并把地址栏改成 #step=3（刷新后还停在这一步）</span>
+  history.replaceState(null, "", "#step=" + n);
+
+  <span class="cm">// 3. 触发这一步专属的刷新</span>
+  if (n === 2) renderPresets(), renderParams(), renderMeasurePicker();
+  if (n === 3) { runPrecheck(); renderRouteSwitch(); refreshReviewState(); }
+  if (n === 4 &amp;&amp; window.refreshResultsGrid) window.refreshResultsGrid();
+  if (n === 5) refreshExpParams();
+}
+</pre>
+
+<div class="box note">
+  <span class="t">一个容易忽略的设计</span>
+  界面<b>不保存</b>任何真数据。你每次进入第 4 步，它都会重新向后端要一次网格数据；
+  进入第 5 步，重新要一次可导出的列清单。
+  这样做的好处是"界面永远是后端状态的快照"，不会出现界面显示的和磁盘上的不一致。
+  代价是每次翻页都要多一次请求——在本地服务上，这个代价可以忽略。
+</div>
+
+<h3>3.2 为什么不用框架</h3>
+<p>三个原因，都很实在：</p>
+<ul>
+  <li><b>离线可用</b>：打包后不能依赖 CDN，框架得整个塞进包里，体积翻几倍；</li>
+  <li><b>调试直观</b>：改一行 CSS 刷新就见效，不需要编译；</li>
+  <li><b>维护者只有一个人</b>：框架带来的抽象，在单人项目里往往是负债。</li>
+</ul>
+
+<div class="box key">
+  <span class="t">这一节你该记住的</span>
+  "五步向导"在代码里只是<b>五个被隐藏的区块 + 一个切换函数</b>。
+  复杂的不是技术，是把每一步该显示什么、该刷新什么想清楚。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="schema">4. 参数：整个软件的"菜单"</h2>
+
+<p class="file">对应文件：ps-shell/backend/params_schema.py（约 900 行，97 条定义）</p>
+
+<p>这是整个项目最重要的一个文件，作者在开头就写了：</p>
+
+<pre class="code">"""praatSauce 参数元数据。
+这是整个 GUI 的单一事实源：界面控件、校验规则、预设方案、CSV 生成
+全部由这里驱动。字段名必须与 praatsauce 的 params.csv 完全一致。
+"""
+</pre>
+
+<h3>4.1 一条参数长什么样</h3>
+<p>它不是"配置"，而是"描述"。每条参数都在描述自己：叫什么、什么类型、归哪一组、给谁看、默认多少、中文怎么解释。</p>
+
+<pre class="code">dict(name="f0min", label="基频下限", type="number",
+     group="pitch", tier="novice", default=60,
+     help="低于这个值的声音不会被当成基频。男声一般 50–75。")
+</pre>
+
+<table>
+  <thead><tr><th style="width:16%">字段</th><th>作用</th><th style="width:30%">例子</th></tr></thead>
+  <tbody>
+    <tr><td><code>name</code></td><td>必须和 <code>params.csv</code> 第一列一模一样，这是两边对话的暗号</td><td><code>f0min</code></td></tr>
+    <tr><td><code>type</code></td><td>决定界面长什么样、怎么转成文本</td><td>dir / file / text / int / number / bool / choice</td></tr>
+    <tr><td><code>group</code></td><td>归到哪一类，决定界面上的分区</td><td>io / measures / pitch / formant / textgrid / advanced</td></tr>
+    <tr><td><code>tier</code></td><td>新手档还是进阶档</td><td>novice / advanced</td></tr>
+    <tr><td><code>help</code></td><td>鼠标悬停时那句人话解释</td><td>"男声一般 50–75"</td></tr>
+    <tr><td><code>cols</code></td><td>这条参数对应结果表里的哪一列（用于反向剔列）</td><td><code>["F1"]</code></td></tr>
+    <tr><td><code>internal</code></td><td>内部开关，界面不显示，由别的开关自动合成</td><td><code>harmonicAmplitude</code></td></tr>
+    <tr><td><code>shell_only</code></td><td>纯外壳概念，不写进 CSV</td><td><code>intervalMode</code></td></tr>
+  </tbody>
+</table>
+
+<h3>4.2 单一事实源是什么意思</h3>
+<p>假设你要加一个新参数。不用改界面、不用改校验、不用改导出，只在 <code>PARAMS</code> 里加一条 <code>dict(...)</code>，然后：</p>
+<ul>
+  <li>界面会自动多出一个控件（因为界面是遍历 <code>PARAMS</code> 生成的）；</li>
+  <li>校验会自动检查它的类型（因为校验也读 <code>PARAMS</code>）；</li>
+  <li><code>params.csv</code> 会自动多一行（因为 <code>build_csv</code> 也是遍历它）。</li>
+</ul>
+
+<div class="box metaphor">
+  <span class="t">比喻</span>
+  这就像餐厅的"塑封菜单"：后厨改了菜，前台、外卖平台、收银系统全跟着变，
+  因为大家看的都是同一张菜单。反过来，如果每个地方各抄一份，迟早会出现"菜单上有、后厨不会做"的事故。
+</div>
+
+<h3>4.3 为什么现在是"两档"而不是三档</h3>
+<p>代码里 <code>TIERS</code> 只有两项：<code>novice</code>（新手）和 <code>advanced</code>（进阶）。早期版本还有个"专家档"，后来并进了进阶——因为实际使用中，所谓"专家"想看的也就是那些底层阈值，没必要再分一层。旧设置里如果还存着 <code>expert</code>，前端会自动映射成 <code>advanced</code>。</p>
+
+<h3>4.4 原子列与汇总开关：翻译的第一层</h3>
+<p>界面上你能单独勾 <code>H1c</code>、<code>H2c</code>、<code>A1c</code>……但 Praat 那边只有一个总开关 <code>harmonicAmplitude</code>。中间这层转换由 schema 负责：</p>
+
+<pre class="code">界面：勾了 H1c 和 H2c，没勾 A1c
+   ↓ 数组合成
+CSV：harmonicAmplitude = 1
+   ↓ Praat 侧推导
+实际计算：F0 和共振峰也必须算（因为算谐波幅度要用）
+   ↓ initiateTable 决定写哪些列
+结果表：只写 H1c H2c H4c A1c A2c A3c H2Ku H5Ku（整组，不做单列筛选）
+   ↓ Python 后处理剔列
+最终：真的只留下你勾的那几列
+</pre>
+
+<p>这条链路解释了很多人第一次用时的疑惑：<b>为什么我只勾了谐波幅度，日志里却在算基频？</b>因为在算学上，没有 F0 就找不到谐波的位置。算归算，最后写不写进表是另一回事。</p>
+
+<h3>4.5 三层优先级：出厂 → 预设 → 你的覆盖</h3>
+<p><code>settings.effective_param_defaults()</code> 决定了界面上参数的初始值，顺序是：</p>
+<ol>
+  <li><b>出厂默认</b>（<code>params_schema</code> 里的 <code>default</code>），比如 f0max = 400；</li>
+  <li><b>预设或发音人档案</b>（男声 50–250、女声 100–400、儿童 …）；</li>
+  <li><b>你自己的覆盖</b>（在设置里改过的值，存进 <code>settings.json</code>）。</li>
+</ol>
+<p>后面的覆盖前面的。所以如果你发现界面上某个值和你记忆里的"出厂值"不一样，先去看设置里是不是存过覆盖。</p>
+
+<div class="box key">
+  <span class="t">这一节你该记住的</span>
+  参数不是散落在各处的 if-else，而是<b>一张被反复读取的表</b>。
+  理解这一点，你就理解了为什么这个项目改功能很快、也理解了为什么改错一个 <code>name</code> 会全线崩。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="csv">5. 翻译：把选项写成点菜单</h2>
+
+<p class="file">对应文件：ps-shell/backend/params_io.py（250 行）、server.py 的 _prepare()</p>
+
+<p>界面上的值最终要变成一张三列的 CSV。列名是固定的：</p>
+
+<pre class="code">variable,input,comment
+inputDir,D:/samples/1,声音文件目录
+outputDir,D:/samples/1/output,结果输出目录
+f0min,60,基频下限
+f0max,400,基频上限
+...
+</pre>
+
+<h3>5.1 生成逻辑只有十几行</h3>
+
+<pre class="code">w.writerow(["variable", "input", "comment"])
+for p in schema.PARAMS:
+    if p.get("shell_only"):
+        continue                      <span class="cm"># 纯外壳概念，不写给 Praat</span>
+    name = p["name"]
+    val  = _normalize(p, values.get(name, p.get("default")))
+    w.writerow([name, val, comment])
+</pre>
+
+<h3>5.2 _normalize：四种必要的翻译</h3>
+<table>
+  <thead><tr><th style="width:22%">界面上的值</th><th style="width:22%">CSV 里写成</th><th>为什么</th></tr></thead>
+  <tbody>
+    <tr><td>勾选 / 不勾</td><td><code>1</code> / <code>0</code></td><td>Praat 没有布尔类型，只认数字</td></tr>
+    <tr><td><code>4.999999999</code></td><td><code>5</code></td><td>浮点运算会留下尾巴，写进文件难看且可能被误读</td></tr>
+    <tr><td>目录留空</td><td><code>path/to/tg</code> 或 <code>0</code></td><td>上游脚本用这个占位值判断"用户没填"，直接写空会读错列</td></tr>
+    <tr><td><code>"60"</code>（字符串）</td><td><code>60</code>（整数）</td><td>避免 Praat 把数字当字符串</td></tr>
+  </tbody>
+</table>
+
+<h3>5.3 为什么一定要落成文件</h3>
+<p>因为 Praat 的 <code>--run</code> 只接受"命令行参数"，不支持结构化的 JSON；而它读 CSV 的能力是现成的、稳定的。所以<b>文件成了两层之间唯一的接口</b>。</p>
+
+<div class="box metaphor">
+  <span class="t">比喻</span>
+  护士不会隔着玻璃喊"三号床抽个血、加个肝功能"，而是写一张单子递进化验室。
+  单子有个好处：出了错可以回溯——到底是医生开错了，还是化验室做错了，看单子就知道。
+  <code>params.csv</code> 就是这张可以回溯的单子，它每次都留在任务临时目录里。
+</div>
+
+<h3>5.4 反方向：导入别人的 params.csv</h3>
+<p>进阶用户可能从论文附录或同事那里拿到一份 <code>params.csv</code>。这个文件可能是 Excel 存的，编码可能是 UTF-16、UTF-8 带 BOM、GBK；分隔符可能是逗号也可能是分号。所以读取函数 <code>_read_text_any</code> 会依次尝试四种编码，全都失败才退回"带替换字符的 UTF-8"。</p>
+
+<p>还有一个细节：如果用户是<b>粘贴</b>内容而不是选文件，内容往往没有表头。而通用解析器会无条件跳过第一行——结果第一个参数就被吃掉了。所以 <code>parse_csv_text_ex</code> 会先探测首行第一格是不是 <code>variable</code>，不是就补一行假表头。</p>
+
+<div class="box note">
+  <span class="t">这段代码教给你的事</span>
+  "健壮"不是写一堆 try/except，而是<b>把真实世界里会出现的脏数据逐条列出来，每条给一个确定的处理方式</b>。
+  这段代码的注释里甚至写明了是哪次验收发现的回归（"粘贴 f0min,60 时 f0min 丢失"）。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="readparams">6. Praat 怎么读懂这张单子</h2>
+
+<p class="file">对应文件：scripts/read_params.praat（约 300 行）</p>
+
+<p>Praat 侧读参数的写法非常朴素——<b>按名字查表</b>：</p>
+
+<pre class="code">Read Table from comma-separated file: .file$
+inputDirID = Search column: "variable", "inputDir"
+.inputDir$ = Get value: inputDirID, "input"
+</pre>
+
+<p>这三行意味着三件事：</p>
+<ul>
+  <li><b>列的顺序无所谓</b>——它按名字找，不按位置；</li>
+  <li><b>多出来的行无所谓</b>——这正是为什么生成的 CSV 有 96 行、上游只有 56 行也能跑；</li>
+  <li><b>少一行就出事</b>——<code>Search column</code> 找不到会返回 0，接着 <code>Get value: 0</code> 直接让整个脚本崩掉，而且报错信息往往只有一句 "Not completed"。</li>
+</ul>
+
+<div class="box note">
+  <span class="t">一个真实踩过的坑</span>
+  早期版本漏写过 <code>cpps</code> 这一行，结果整批任务在读取参数阶段就崩了。
+  所以现在有一条硬规矩：<b><code>params.csv</code> 必须包含 schema 里的每一行，宁可多写不可少写。</b>
+</div>
+
+<h3>6.1 隐式依赖：Praat 会自己"补课"</h3>
+<p>这是 <code>read_params.praat</code> 里最值得读的一段：</p>
+
+<pre class="code">.measureFormants = .formant + .harmonicAmplitude + .harmonicAmplitudeUncorrected +
+  ... .bw + .bwHawksMiller + .slope + .slopeUncorrected
+
+.measurePitch = .pitch + .harmonicAmplitude + .harmonicAmplitudeUncorrected +
+  ... .slope + .slopeUncorrected + .bw + .bwHawksMiller + .soe
+</pre>
+
+<p>翻成人话：</p>
+<ul>
+  <li>只要你勾了<b>谐波幅度</b>、<b>频谱斜率</b>、<b>带宽</b>或 <b>SoE</b> 中的任何一个，它就必须算 F0；</li>
+  <li>只要你勾了谐波幅度或斜率，它就必须算共振峰。</li>
+</ul>
+
+<p>这不是冗余，是数学上的必要：谐波幅度是"第几号谐波相对 F0 有多高"，没有 F0 就没有谐波的坐标。</p>
+
+<h3>6.2 算归算，写不写是另一回事</h3>
+<p>Praat 算了 F0，但如果你没勾 F0，结果表里不会多出 <code>f0</code> 列——因为写表头的时候看的是 <code>params.pitch</code>，不是 <code>measurePitch</code>。这两个变量名字很像，含义完全不同：</p>
+
+<table>
+  <thead><tr><th style="width:26%">变量</th><th>含义</th><th style="width:26%">影响什么</th></tr></thead>
+  <tbody>
+    <tr><td><code>params.pitch</code></td><td>用户要不要 <b>输出</b> f0 这一列</td><td>表头、结果表</td></tr>
+    <tr><td><code>params.measurePitch</code></td><td>这一批<b>需不需要算</b> F0</td><td>计算流程（可能因为别的参数被迫算）</td></tr>
+  </tbody>
+</table>
+
+<div class="box key">
+  <span class="t">这一节你该记住的</span>
+  "用户想要的"和"计算必需的"是两件事。好的设计会把它们分开命名、分开使用。
+  混用这两个概念，就会出现"没勾 F0 却有 f0 列"或者"勾了 SoE 却算不出东西"的怪现象。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="exec">7. 批量执行：一个任务的完整生命周期</h2>
+
+<p class="file">对应文件：ps-shell/backend/server.py，核心是 _prepare()（200–289 行）与 _execute()（420–625 行）</p>
+
+<p>点下"开始批量"之后，后台不是直接调 Praat，而是先建一张"任务单"。这个任务单是个 Python 对象：</p>
+
+<pre class="code">class Job:
+    id           <span class="cm"># 任务编号，也是临时目录名</span>
+    status       <span class="cm"># running / done / error / cancelled</span>
+    progress     <span class="cm"># {"done": 12, "total": 40, "current": "13.wav"}</span>
+    log          <span class="cm"># 一行行日志（界面日志框就是它的镜像）</span>
+    result_path  <span class="cm"># 最终 out.tsv 的路径</span>
+    stop_event   <span class="cm"># 一个"取消"开关，Praat 进程靠它被杀掉</span>
+</pre>
+
+<h3>7.1 _prepare：开跑前的六件杂事</h3>
+<p>这六件事都不起眼，但少一件就会出问题：</p>
+
+<table>
+  <thead><tr><th style="width:5%">#</th><th style="width:24%">做什么</th><th>为什么必须做</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>找到 praat.exe 和脚本目录</td><td>路径可能来自设置、程序根目录、或自动探测</td></tr>
+    <tr><td>2</td><td>建任务临时目录 <code>%TEMP%\PraatSauceShell\&lt;jobid&gt;</code></td><td>params.csv、filelist、进度文件都放这儿，不污染你的数据目录</td></tr>
+    <tr><td>3</td><td>如果存在 <code>Resample/</code> 子目录，把工作目录切过去</td><td>否则原始 wav 和重采样副本会被同时扫进来，同名文件互相覆盖</td></tr>
+    <tr><td>4</td><td>补默认路径：输出 → <code>&lt;音频&gt;/output</code>；中间对象 → <code>&lt;音频&gt;</code></td><td>不补的话 Praat 会把结果写到它自己的工作目录，后台却去音频目录找，表现为"算完了但没有结果"</td></tr>
+    <tr><td>5</td><td>给每个 wav 建 <code>measure/</code> 子目录</td><td><b>Praat 自己不会建目录</b>，父目录不存在时 <code>Save as text file</code> 直接失败</td></tr>
+    <tr><td>6</td><td>删掉 0 字节的 <code>.Pitch</code>/<code>.Formant</code></td><td>这些是上次跑到一半手动停止留下的残骸；留着会被"读回"逻辑当成有效文件，结果整列空白</td></tr>
+  </tbody>
+</table>
+
+<div class="box metaphor">
+  <span class="t">比喻</span>
+  这就像手术前的"术前准备清单"：核对器械、铺台、给病人编号、把上一台留下的垃圾清掉。
+  任何一项偷懒，台上就会出问题，而且出的问题往往看起来像"技术不行"，其实是准备没做。
+</div>
+
+<h3>7.2 进度条为什么要"走后门"</h3>
+<p>这是整个项目里最值得学的一个技巧。</p>
+
+<p>Praat 每处理一个文件会打印一行 <code>Processing 13.wav</code>。理论上后台读这行就能更新进度条。但实际不行——<b>Praat 的输出在管道里是全缓冲的</b>：所有行要等进程结束才一次性吐出来。于是进度条会从 0% 卡到 100%，中间毫无反馈。</p>
+
+<p>解决办法不是去改 Praat，而是<b>让它写文件</b>：</p>
+
+<pre class="code"><span class="cm"># praatSauce.praat 里加的第二参数</span>
+appendFile: progressloc$, thisWav$ + newline$
+
+<span class="cm"># Python 侧起一个线程，每 0.4 秒读一次这个文件</span>
+def watch_progress():
+    seen = 0
+    while not stop_watch.is_set():
+        names = 读 ps_progress.txt 的所有行
+        if len(names) &gt; seen:
+            for n in names[seen:]:
+                job.add_log("Processing " + n)
+            seen = len(names)
+            job.progress["done"] = min(seen, job.progress["total"])
+        stop_watch.wait(0.4)
+</pre>
+
+<p>为什么文件行、管道不行？因为文件写入默认是不缓冲的（每次 append 立即落盘），而管道有 4KB 左右的缓冲区。<b>换个通道，问题就没了。</b></p>
+
+<h3>7.3 怎么跟 Praat 说话</h3>
+
+<pre class="code">cmd = [exe]
+if full_trust:
+    cmd.append("--FULL-TRUST")     <span class="cm"># Praat 7 默认禁止脚本写文件</span>
+cmd += ["--run", script] + [str(a) for a in args]
+</pre>
+
+<ul>
+  <li><code>--run</code>：批处理模式，不弹任何窗口。GUI 里跑脚本用的是另一套参数（<code>--new-send</code>），混用会失败。</li>
+  <li><code>--FULL-TRUST</code>：Praat 7 把"脚本存文件"视为危险动作，不加这个会直接报错退出。</li>
+</ul>
+
+<p>启动进程后，后台开两个线程分别读 stdout 和 stderr，因为 Praat 的这两个通道编码还不一样：stdout 带 UTF-16 BOM，stderr 常常是不带 BOM 的 UTF-16。判断逻辑是"先看 BOM，再看奇数位是不是大量为 0"：</p>
+
+<pre class="code">if chunk[:2] in (b"\xff\xfe", b"\xfe\xff"): return "utf-16"
+odd_zeros = sum(1 for i in range(1, len(sample), 2) if sample[i] == 0)
+if odd_zeros &gt;= len(sample) // 4: return "utf-16-le"
+return "utf-8"
+</pre>
+
+<div class="box note">
+  <span class="t">为什么要用增量解码器</span>
+  一个汉字的 UTF-16 是两个字节，网络/管道读到的块可能正好切在中间。
+  如果用普通的 <code>decode()</code>，这个半字符就会变成乱码。
+  <code>codecs.getincrementaldecoder()</code> 会把没读完的半个字符留到下一块，这就是"流式解码"。
+</div>
+
+<h3>7.4 结果"新鲜度"校验：一个反直觉的细节</h3>
+<p>Praat 跑完，后台要去确认"结果文件真的生成了"。直觉写法是 <code>os.path.exists(result_path)</code>，但这个项目用的是：</p>
+
+<pre class="code">fresh = os.path.getmtime(result_path) &gt; job.started
+if not fresh:
+    job.status = "error"
+    job.error = "Praat 没有生成结果文件..."
+</pre>
+
+<p>为什么？因为跑之前会<b>归档上一版结果</b>，而归档用的是"复制"不是"移动"——Praat 失败时，旧结果还躺在原地。这时候 <code>exists</code> 一定是 True，界面就会显示"成功"，而你看到的是上一次的数据。这是最危险的一类 bug：<b>静默地给你错的东西</b>。</p>
+
+<p>用"修改时间晚于任务开始时间"来判断，就绕开了这个陷阱。归档用复制而不是移动，也是同一个考虑：宁可多占一点磁盘，也不能在失败时把上一版弄丢。</p>
+
+<h3>7.5 跑完之后还要做三件事</h3>
+<table>
+  <thead><tr><th style="width:18%">动作</th><th>做什么</th><th style="width:34%">为什么不在 Praat 里做</th></tr></thead>
+  <tbody>
+    <tr><td>SHR 补算</td><td>读结果表，按公式补一列 SHR</td><td>上游脚本没有这个测量，改它不如在外面加</td></tr>
+    <tr><td>剔列</td><td>把没勾的 F4/F5/B4/B5/HNR* 等列删掉</td><td>Praat 为了算别的参数可能多算了几列，但用户不想看到</td></tr>
+    <tr><td>舍入</td><td>时间列不动；HNR、CPP 两位小数；其余一位</td><td>Praat 输出的是十几位浮点，直接给你反而难读</td></tr>
+  </tbody>
+</table>
+
+<h3>7.6 两种"看起来成功、其实是失败"</h3>
+<ol>
+  <li><b>0 行</b>：Praat 正常退出，但表里只有表头。最常见的原因是目录里没有音频，或者 TextGrid 标签正则把所有区间都滤掉了。后台会附一句诊断："本次声音文件 N 个；TextGrid 目录里找到 M 个"。</li>
+  <li><b>f0 和 F1 检出率都是 0</b>：说明整批都没测到，几乎一定是基频范围设错了（比如给男声设了 100–400）。这种情况会直接在最上面插一条红色诊断。</li>
+</ol>
+
+<div class="box key">
+  <span class="t">这一节你该记住的</span>
+  一个可靠的批处理程序，功夫都在"开跑前"和"跑完后"：
+  开跑前把环境准备到不可能失败，跑完后用<b>独立证据</b>（文件时间、行数、检出率）验证结果，
+  而不是相信"进程退出码是 0"。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="praat">8. Praat 内部：一个音频怎么被拆开测</h2>
+
+<p class="file">对应文件：scripts/praatSauce.praat（约 500 行）+ 19 个被 include 的零件脚本</p>
+
+<p>主脚本本身不长，它更像一个"总装线"：开头把 19 个过程脚本拼进来，然后读参数、写表头、循环文件、循环区间、拼表。</p>
+
+<pre class="code">include read_params.praat
+include get_times.praat
+include get_formants.praat
+include get_pitch.praat
+include get_spectralMeasures.praat
+... 共 19 个
+</pre>
+
+<h3>8.1 先写表头，再干活</h3>
+<p>第一件事不是读音频，而是<b>把表头写进结果文件</b>：</p>
+
+<pre class="code">@initiateTable: params.pitch, params.formant, ... params.useTextGrid
+</pre>
+
+<p><code>initiateTable</code> 按你勾的测量项拼出一行列名，存成一个只有表头的 tsv。列的顺序是固定的：</p>
+
+<pre class="code">file [label intervaldID] t f0 F1 F2 F3 H1c H2c H4c ... CPP CPPS HNR05 ... intensity soe
+</pre>
+
+<div class="box note">
+  <span class="t">一个看似无聊、其实很聪明的设计</span>
+  先写表头，意味着<b>任何中途崩溃都会留下"表头正确、0 行"的文件</b>。
+  你一看就知道：参数读进来了、表头拼对了，问题出在后面的计算或文件读取。
+  如果反过来"算完再写表头"，崩溃时你连一个文件都看不到，什么线索都没有。
+  <br><br>
+  另外，<code>intervaldID</code> 这个拼写（多一个 d）是上游原样保留的。
+  别去"修正"它——改了之后，所有按列名读取的旧脚本都会失效。
+</div>
+
+<h3>8.2 两层循环</h3>
+<pre class="code">for thisFile from 1 to numFile          <span class="cm"># 外层：每个音频</span>
+    snd = Read from file: ...
+    @times: ...                          <span class="cm"># 决定这段音频要测哪几刀</span>
+
+    for int from 1 to times.numIntervals <span class="cm"># 内层：每个标注段</span>
+        ... 八种测量 ...
+    endfor
+endfor
+</pre>
+
+<p>不用 TextGrid 时，<code>times.numIntervals</code> 恒等于 1，也就是"整段算一刀"。这样上层代码不用写两套逻辑。</p>
+
+<h3>8.3 @times：这段录音要测哪几刀</h3>
+<p><code>get_times.praat</code> 做三件事：</p>
+<ol>
+  <li>按音频文件名找同名 <code>.TextGrid</code>；</li>
+  <li>用正则筛出你要的标签（<code>includeTheseLabels</code>）；</li>
+  <li>把所有选中区间的起点、终点、标签各取出来，变成三个数组。</li>
+</ol>
+
+<p>这里有一个上游没有、本项目加的重要行为：<b>找不到 TextGrid 就测整段，而不是整批中止</b>。上游的做法是"TextGrid 数量和音频数量不一致就退出"，这在实际调查里几乎必然发生（有些字没做标注）。现在的做法是逐文件判断，最后打印一句总结：</p>
+
+<pre class="code">PSA_TG_SUMMARY 38 file(s) measured on TextGrid intervals, 2 file(s) measured over the whole sound.
+</pre>
+
+<div class="box metaphor">
+  <span class="t">比喻</span>
+  <code>times</code> 就像切菜前的"下刀位置表"。有标注的人，按标注下刀；没标注的人，整根下锅。
+  关键是<b>不能因为一个人没标注，就让整桌菜都不做了</b>。
+</div>
+
+<h3>8.4 八种测量：各自交出一串数</h3>
+<table>
+  <thead><tr><th style="width:14%">测量</th><th style="width:20%">脚本</th><th>交出什么</th></tr></thead>
+  <tbody>
+    <tr><td>基频 F0</td><td>get_pitch.praat</td><td>每帧的 f0 值 + 每帧的时间</td></tr>
+    <tr><td>共振峰</td><td>get_formants.praat</td><td>F1/F2/F3（可选 F4/F5）与带宽 B1–B3</td></tr>
+    <tr><td>谐噪比</td><td>get_HNR.praat</td><td>五个频带的 HNR（0.5k / 1.5k / 2.5k / 3.5k / 3.8k）</td></tr>
+    <tr><td>CPP</td><td>get_CPP.praat</td><td>倒谱峰值突显</td></tr>
+    <tr><td>CPPS</td><td>ps_get_CPPS.praat</td><td>平滑后的 CPP</td></tr>
+    <tr><td>强度</td><td>get_intensity.praat</td><td>每帧 RMS 强度</td></tr>
+    <tr><td>谐波幅度/斜率</td><td>get_spectralMeasures.praat</td><td>H1/H2/H4/A1/A2/A3 及各种差值</td></tr>
+    <tr><td>SoE</td><td>get_SoE.praat</td><td>激励强度</td></tr>
+  </tbody>
+</table>
+
+<p>每个过程都遵守同一个约定：返回一个向量（一串数）和一个帧数，外加一个时间向量。这个约定是后面能"对齐"的前提。</p>
+
+<h3>8.5 对齐：整章最关键的二十行</h3>
+
+<p><b>问题</b>：不同测量的时间网格不一样。F0 每 5 毫秒一个点；HNR 可能起点晚一点、点数少一点；如果共振峰分析窗更长，它的第一帧可能落在 8 毫秒处。如果直接把几条序列首尾一拼，第 100 行的 f0 和第 100 行的 HNR 可能根本不是同一时刻。</p>
+
+<p><b>做法</b>分三步：</p>
+
+<pre class="code"><span class="cm">## 1. 先问所有测量：你一共几帧？取最大值</span>
+mostFrames = max(frameNums#)
+firstFrame = min(firstFrame#)
+lastFrame  = max(lastFrame#)
+
+<span class="cm">## 2. 以帧数最多的那条序列的时间轴为准</span>
+
+<span class="cm">## 3. 短的序列：前面补、后面补，补到一样长</span>
+@zeroPadding: pitch.f0#, pitch.numFrames, mostFrames, pitch.times#, ...
+</pre>
+
+<div class="box metaphor">
+  <span class="t">比喻</span>
+  一支合唱队，有人从第 1 拍开始唱，有人从第 3 拍才进，还有人提前收声。
+  要录成一条整齐的音轨，就得先确定"总共多少拍"，然后给晚进的人前面补静音、给早退的人后面补静音。
+  补的这个"静音"就是 <code>undefined</code>。
+</div>
+
+<h3>8.6 为什么补 undefined 而不是补 0</h3>
+<p>这是 <code>zeroPadding.praat</code> 里被本项目专门改过的一处，值得逐行读：</p>
+
+<pre class="code"><span class="cm">### 本项目补丁（2026-10-18）：补位值由 0 改为 undefined（= NaN）。</span>
+<span class="cm">### 0 同时是合法测量值（谱幅度 0 dB、SoE 0 等），下游无法区分</span>
+<span class="cm">### 「这一帧没测到」与「真测到 0」，补出来的 0 会被统计当成真实值拉低均值。</span>
+
+padStart# = zero#( round(diffFrames) ) * undefined   <span class="cm"># 0 × NaN = NaN</span>
+</pre>
+
+<p>三个技术细节，都是踩过坑才有的：</p>
+<ul>
+  <li>Praat 没有 <code>undefined#(n)</code> 这种写法，所以用 <code>zero#(n) * undefined</code> 造出 n 个缺失值；</li>
+  <li><code>zero#(0)</code> 会直接报错，所以补位前必须先判断个数大于 0；</li>
+  <li>写进文件时，缺失值会变成 <code>--undefined--</code>，而 0 还是 0。读取时要靠 <code>_to_float()</code> 把前者认成空。</li>
+</ul>
+
+<div class="box note">
+  <span class="t">为什么这件事值得你花五分钟理解</span>
+  在实验语音学里，"没测到"和"测到 0"是两种完全不同的信息。
+  一个 0 dB 的谐波幅度是真实存在的（虽然罕见），一个因为静音而没测到的帧则是缺失。
+  如果你把它们都写成 0，均值会被拉低、标准差会变大、画出来的曲线会在静音处突然掉到 0——
+  而这些错误<b>不会报错</b>，只会让你的结论慢慢偏掉。
+  <br><br>
+  这是"数据清洗"里最基础也最容易被忽略的一条：<b>缺失值必须有自己的表示法</b>。
+</div>
+
+<h3>8.7 拼表：从几条向量到一张长表</h3>
+
+<pre class="code">Create simple Matrix from values: "results", { times# }   <span class="cm"># 先放时间列</span>
+@combineMatrices: { f0# }                                  <span class="cm"># 一列一列往上拼</span>
+@combineMatrices: { f1#, f2#, f3# }
+...
+@prepareTable: thisWav$, params.outputDir$, params.outputFile$, params.useTextGrid, ...
+</pre>
+
+<p><code>prepareTable</code> 做的事很"笨"但很稳：把矩阵转置、转成表、给每一行填上文件名（和标签、段号），然后<b>追加</b>到结果文件末尾。</p>
+
+<p>因为是追加，所以结果文件是"长表"：一个文件有 300 帧，就有 300 行；10 个文件就是 3000 行。这也是为什么后面的统计要按 <code>file</code> 分组。</p>
+
+<h3>8.8 收尾</h3>
+<p>循环结束后，脚本打印一句总结，然后退出。就这么多——它不负责画图、不负责诊断、不负责告诉你"这个参数可能设错了"。那些都是后台的事。</p>
+
+<div class="box key">
+  <span class="t">这一节你该记住的</span>
+  Praat 脚本的核心不是"怎么算"，而是<b>怎么把不同来源、不同长度的序列，拼成一张每行都对齐的表</b>。
+  对齐靠三样东西：统一的帧数（mostFrames）、统一的时间轴、以及一个诚实的缺失值。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="results">9. 结果层：怎么判断测得准不准</h2>
+
+<p class="file">对应文件：ps-shell/backend/results.py（约 520 行）</p>
+
+<p>Praat 只会算数，不会怀疑自己。判断"这批数据能不能用"是后台的责任。</p>
+
+<h3>9.1 只读前 200 行</h3>
+<p>结果表可能几万行。界面上只显示前 200 行（试跑时 5000 行，因为要画完整曲线）。这不是偷懒，是避免浏览器被几万个单元格卡死。</p>
+
+<h3>9.2 检出率：这个软件最核心的一个指标</h3>
+
+<pre class="code">ratio = 有值的帧数 / 总帧数
+</pre>
+
+<p>它回答的问题是：<b>我设的参数，到底覆盖了多大的范围？</b></p>
+<ul>
+  <li>F0 检出率 95%：参数设得很合适；</li>
+  <li>F0 检出率 30%：要么范围太窄，要么这段录音大部分是清音/噪声；</li>
+  <li>F0 检出率 0%：基本一定是范围反了（比如给男声设 200–400）。</li>
+</ul>
+
+<h3>9.3 静音段必须排除，否则会冤枉你</h3>
+
+<pre class="code">SILENCE_LABELS = {"sil", "silence", "sp", "pau", "#", ""}
+</pre>
+
+<p>假设一段 10 秒的录音，前后各 2 秒静音。静音段当然测不到 F0。如果把静音也算进分母，F0 检出率最高也只有 60%，程序就会报"基频检出率偏低"，你被误导去改参数——越改越糟。</p>
+
+<p>所以统计检出率时，<b>分母只算有效语音段</b>。这条规则在 2026-10-18 被明确写进代码，注释里还留着实测记录：不排除时 15 个文件全被点名，实际目标段检出率是 87–98%。</p>
+
+<h3>9.4 怎么判断"这个文件有问题"</h3>
+
+<pre class="code">bad = [p for p in per_file
+       if p["f0Ratio"] is not None and p["f0Ratio"] &lt; 0.35]
+</pre>
+
+<p>但光看 35% 还不够——如果整批都只有 30%，那不是某个文件的问题，是参数的问题。所以还要加一个相对条件：</p>
+
+<pre class="code">文件级异常 = 检出率 &lt; 35%  且  低于批内中位数 × 0.6
+</pre>
+
+<div class="box metaphor">
+  <span class="t">比喻</span>
+  一个班考试，判断"谁考砸了"不能只看绝对分。
+  如果全班平均 40 分，那 35 分不算砸，是卷子太难；
+  如果全班平均 90 分，那 50 分就是明显异常。
+  所以既看绝对线，也看"跟同批人比"。
+</div>
+
+<h3>9.5 参数建议是算出来的，不是写死的</h3>
+
+<pre class="code">if s["median"] &gt;= f0max * 0.92:
+    "基频中位数已经接近上限，把上限提到 median × 1.4 左右再试"
+if s["median"] &lt;= f0min * 1.08:
+    "基频中位数贴近下限，把下限降到 median × 0.6 左右再试"
+</pre>
+
+<p>这就是为什么诊断读起来像有个人在看你的数据——它确实在算：拿你这次的中位数，去比你设的上下限。</p>
+
+<h3>9.6 0 与 undefined 的分工</h3>
+<table>
+  <thead><tr><th style="width:24%">在文件里</th><th style="width:24%">含义</th><th>统计时</th></tr></thead>
+  <tbody>
+    <tr><td><code>0</code></td><td>测到了，值就是 0</td><td>算进均值、算进检出率</td></tr>
+    <tr><td><code>--undefined--</code></td><td>这一帧没测到</td><td>跳过，不算均值也不算检出</td></tr>
+    <tr><td>空</td><td>旧版本或外部文件的缺失写法</td><td>同 undefined</td></tr>
+  </tbody>
+</table>
+
+<div class="box key">
+  <span class="t">这一节你该记住的</span>
+  任何测量工具都要回答一个问题：<b>"测不出来"怎么表示？</b>
+  这个软件的回答是 undefined，并且把"静音不算失败""同批比较"写进了诊断逻辑。
+  这两条你以后自己做数据分析时可以直接搬。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="review">10. 复核：九宫格与人工修正</h2>
+
+<p class="file">对应文件：review_grid.py（约 1700 行）、review_build.praat、review_export.praat、review_export.py、review_choice.py</p>
+
+<h3>10.1 为什么非要人工看一眼</h3>
+<p>自动算法会犯两类错，而且都很常见：</p>
+<ul>
+  <li><b>F0 差一个八度</b>：真实 220 Hz 被算成 110 Hz（漏掉一半周期），曲线看起来"很平滑"，但在表里就是错的值；</li>
+  <li><b>共振峰串位</b>：F1 被噪声顶到 1100 Hz，或者 F1/F2 糊成一个峰。</li>
+</ul>
+<p>这两类错在 5000 行的表里完全看不出来，但在曲线上一眼就能认出来。所以第 4 步的存在不是"锦上添花"，而是<b>数据质量控制的必经环节</b>。</p>
+
+<h3>10.2 九宫格：先粗看一遍</h3>
+<p><code>build_grid()</code> 一次处理一页 9 个文件（<code>size=9</code>），做三件事：</p>
+<ol>
+  <li>列出目录下所有 wav，按页切片；</li>
+  <li>动态生成一个一次性 Praat 脚本——把这 9 个文件的路径直接写进脚本里；</li>
+  <li>读回生成的 <code>.Pitch</code>/<code>.Formant</code> 文本，转成 JSON 点序列，每个文件最多保留 320 个点。</li>
+</ol>
+
+<pre class="code">MAX_POINTS = 320        <span class="cm"># 每个文件最多回传 320 个点</span>
+</pre>
+
+<p>为什么要降采样？一个 3 秒的文件按 5 毫秒一帧是 600 个点，9 个文件就是 5400 个点；如果原样传给浏览器，画图会卡。320 个点足够看出"有没有差八度"，又不至于拖慢界面。</p>
+
+<div class="box note">
+  <span class="t">为什么是"动态生成脚本"而不是"传一个文件清单"</span>
+  因为 Praat 读清单的语法很脆弱（分隔符、空行、编码都可能出问题）。
+  而"把 9 个路径直接写进脚本"是最笨也最不容易出错的做法。
+  这个项目在别处用清单（<code>workList</code>），在这里用生成脚本——<b>同一个问题，选最稳的那种解法</b>。
+</div>
+
+<h3>10.3 单文件详情：一次生成 23 组候选</h3>
+<p>点开某一个格子，进入详情页。这时走的是另一条路：<code>review_build.praat</code>。</p>
+
+<pre class="code"><span class="cm"># Pitch：扫 3 档上限</span>
+for pIndex to 3        <span class="cm"># 400 / 500 / 600</span>
+    To Pitch (filtered autocorrelation): 0.0, 75, ceil, 15, 0, 0.03, ...
+    Save as text file: outDir$ + "/pitch_" + string$(ceil) + ".pitch"
+endfor
+
+<span class="cm"># Formant：5 档上限 × 4 档数量 = 20 组</span>
+for fIndex to 5        <span class="cm"># 4977 / 5232 / 5500 / 5782 / 6078</span>
+    for nIndex to 4    <span class="cm"># 4 / 5 / 6 / 7</span>
+        To Formant (burg): 0.0, nF, fceil, 0.025, 50
+    endfor
+endfor
+</pre>
+
+<p>为什么要连"数量"一起扫？因为 Praat 手册明确说 <code>maxNumberOfFormants</code> 和 <code>formant ceiling</code> 是<b>一对</b>参数。LPC 阶数 = 2 × 数量，数量选 4，F1/F2 会糊成一个包络峰，实测 F1 会虚高到 1100 Hz 以上。手册推荐值是 5。</p>
+
+<div class="box note">
+  <span class="t">代码里的那段警告值得一读</span>
+  脚本注释里写着：曾经把参数顺序写错成 <code>"0.0, 5, 0, 0.025, ceil"</code>，
+  结果 <code>maximumFormant=0</code>、<code>preEmphasis=ceil</code>，
+  共振峰退化成 6000–19000 Hz 的无意义值。
+  <b>Praat 不会因为你参数写错就报错，它会安静地给你垃圾。</b>
+  这也是为什么这个项目到处都在强调"实测"和"存盘后核对"。
+</div>
+
+<h3>10.4 三条人工修正路线</h3>
+<table>
+  <thead><tr><th style="width:20%">路线</th><th>怎么做</th><th style="width:30%">适合什么情况</th></tr></thead>
+  <tbody>
+    <tr><td>点图改 F0</td><td>在曲线上加点、删点、撤销；手工点用深紫色标出</td><td>个别帧差八度、或者清浊判断错了</td></tr>
+    <tr><td>FormantPath 编辑器</td><td>对 9 档 ceiling 逐段打分，自动挑最优组合</td><td>整段共振峰都串位（常见于鼻化、儿化）</td></tr>
+    <tr><td>在 Praat 里修周期</td><td>打开 GUI，用 Pulses 手工标周期，存盘后读回</td><td>噪声大、算法完全跟不上</td></tr>
+  </tbody>
+</table>
+
+<h3>10.5 落盘：为什么最后是在 Python 里改文本</h3>
+<p>这是整个项目最"野蛮"也最精彩的一处。</p>
+
+<p>需求是：用户改了几个 F0 点，要把这些点写进 <code>.Pitch</code> 对象，好让后续批量测量直接用。正常思路是让 Praat 去改，但实测 Praat 7 的 Pitch 对象<b>没有任何逐帧修改命令</b>：</p>
+
+<pre class="code">Set value at time / To PitchTier / Shift / Set value in frame
+→ 全部报 "not available for current selection"
+</pre>
+
+<p>于是作者换了一条路：<b>直接改 <code>.Pitch</code> 这个文本文件</b>。Pitch 对象存成文本时长这样：</p>
+
+<pre class="code">frames [1]:
+    candidates [1]:
+        frequency = 123.456
+    candidates [2]:
+        frequency = 246.912
+</pre>
+
+<p>后端用正则找到"离修正点最近的那一帧"，把 <code>candidates[1]</code> 的 frequency 改掉。改完的文件，Praat 下次读进来就是修正后的值。</p>
+
+<div class="box metaphor">
+  <span class="t">比喻</span>
+  你想改一张已打印的表格，但打印机不支持修改。于是你直接打开源文件改，再重新打印。
+  这不是"绕过问题"，而是<b>找到真正的数据源头</b>——对象文件就是源头，Praat 只是它的一个读写器。
+</div>
+
+<p>这里还有一条通用教训，代码注释里写得很清楚：</p>
+
+<pre class="code"><span class="cm">## nocheck 前缀是"命令不可用时静默跳过"，</span>
+<span class="cm">## 所以不能用它判断命令是否存在——必须去掉 nocheck 跑一次，</span>
+<span class="cm">## 看是否报 "not available for current selection"。</span>
+</pre>
+
+<h3>10.6 measure/ 是整条流水线的数据总线</h3>
+
+<pre class="code">&lt;wav 所在目录&gt;/measure/&lt;主名&gt;.Pitch
+&lt;wav 所在目录&gt;/measure/&lt;主名&gt;.Formant
+</pre>
+
+<p>四个环节都围着这个目录转：</p>
+<table>
+  <thead><tr><th style="width:18%">环节</th><th style="width:14%">动作</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>批量测量</td><td>写</td><td>勾了"保存中间文件"时，把算出的对象存进来</td></tr>
+    <tr><td>九宫格</td><td>读</td><td>有就直接展示，不重算（<code>reuse=True</code>）</td></tr>
+    <tr><td>审核落盘</td><td>写</td><td>人工修正后的对象覆盖进来</td></tr>
+    <tr><td>导出序列</td><td>读</td><td>F0、F1–F5 从对象里取，比汇总表更全</td></tr>
+  </tbody>
+</table>
+
+<p>有一个真实的坑，注释里记着：当音频在子目录里时，<code>measure/</code> 必须插在<b>主名之前</b>，而不是加在目录后面：</p>
+
+<pre class="code">对：&lt;input&gt;/sub/measure/11.Pitch
+错：&lt;input&gt;/measure/sub/11.Pitch     <span class="cm"># 顺序反了，两处代码就找不到同一个文件</span>
+</pre>
+
+<div class="box key">
+  <span class="t">这一节你该记住的</span>
+  中间结果（对象文件）不是"缓存"，而是<b>流水线上的半成品</b>。
+  把它当正式产物来管理——统一命名、统一目录、写入前建目录、读回时校验——
+  你才能做到"审完不用重算"，也才能在换参数时清楚地知道哪些要重做。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="export">11. 导出：最后一道工序</h2>
+
+<p class="file">对应文件：ps-shell/backend/series_export.py（约 1200 行）</p>
+
+<p>导出看起来简单，实际是整个项目里分支最多的模块。因为它要回答三个正交的问题：</p>
+
+<h3>11.1 数据从哪来（两个源）</h3>
+<table>
+  <thead><tr><th style="width:26%">源</th><th>有什么</th><th style="width:34%">没有什么</th></tr></thead>
+  <tbody>
+    <tr><td>汇总表 <code>out.tsv</code></td><td>谐波幅度、斜率、HNR、CPP、CPPS、强度、SoE</td><td>F4/F5、B4/B5（上游只写 F1–F3/B1–B3）</td></tr>
+    <tr><td>对象文件 <code>.Pitch</code>/<code>.Formant</code></td><td>F0、F1–F5、B1–B5</td><td>谐波、噪声类</td></tr>
+  </tbody>
+</table>
+
+<p>所以导出时是"两边各取一部分，拼成一张表"。这也是为什么导出页的提示会写"缺哪一类，那几列就是空的"。</p>
+
+<h3>11.2 时间怎么取（三种重采样）</h3>
+<table>
+  <thead><tr><th style="width:16%">方式</th><th>做法</th><th style="width:30%">适合</th></tr></thead>
+  <tbody>
+    <tr><td><code>raw</code></td><td>原样，Praat 的帧网格（约 5 ms 一帧）</td><td>要做生长曲线、需要最大信息量</td></tr>
+    <tr><td><code>smooth</code></td><td>先小窗平滑（只在浊音段内，不跨静音缝），再等间隔降采样</td><td>画曲线、看趋势</td></tr>
+    <tr><td><code>interval</code></td><td>按固定间隔（如 10 ms）线性插值取点</td><td>不同文件要对齐到同一时间轴</td></tr>
+  </tbody>
+</table>
+
+<h3>11.3 文件怎么排（四种布局）</h3>
+<table>
+  <thead><tr><th style="width:16%">布局</th><th>结构</th><th style="width:30%">适合</th></tr></thead>
+  <tbody>
+    <tr><td><code>single</code></td><td>一张长表：file, time_s, 参数…</td><td>R / Python 最好读</td></tr>
+    <tr><td><code>per_audio</code></td><td>每个音频一张宽表（time_s × 参数）</td><td>逐个检查</td></tr>
+    <tr><td><code>per_param</code></td><td>每个参数一张跨音频长表</td><td>单参数建模</td></tr>
+    <tr><td><code>xlsx</code></td><td>一个工作簿，每参数一页 + 说明页</td><td>给不写代码的合作者</td></tr>
+  </tbody>
+</table>
+
+<div class="box note">
+  <span class="t">两个不起眼但很要命的细节</span>
+  1. 所有 CSV 都写成 <b>UTF-8 带 BOM</b>。不带 BOM 的话，Excel 双击打开中文列名会乱码。
+  <br>
+  2. 对象里没有的参数写<b>空</b>，不写 0。比如 3 阶 Formant 没有 F4，如果写 0，你以后做统计会把 0 当成真实测量值。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="flow">12. 把整条链路串起来</h2>
+
+<p>现在把前面九节连成一条线。跟着一个具体的文件 <code>11.wav</code> 走一遍：</p>
+
+<table>
+  <thead><tr><th style="width:5%">站</th><th style="width:17%">谁在做</th><th style="width:22%">拿到什么</th><th style="width:24%">交出什么</th><th>存在哪</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>界面（第 1 步）</td><td>你选的文件夹</td><td>文件清单、时长、采样率</td><td>内存</td></tr>
+    <tr><td>2</td><td>界面（第 2 步）</td><td>预设 + 你的勾选</td><td>一个 values 字典</td><td>内存 + settings.json</td></tr>
+    <tr><td>3</td><td>后台 <code>_prepare</code></td><td>values 字典</td><td><code>params.csv</code> + 建好的 measure/ 目录</td><td><code>%TEMP%\PraatSauceShell\&lt;jobid&gt;\</code></td></tr>
+    <tr><td>4</td><td>后台 <code>_execute</code></td><td>params.csv</td><td>启动 praat.exe 子进程</td><td>—</td></tr>
+    <tr><td>5</td><td>Praat</td><td>params.csv + 11.wav + 11.TextGrid</td><td>每个标注段若干行测量值</td><td><code>&lt;音频&gt;/output/out.tsv</code></td></tr>
+    <tr><td>6</td><td>Praat（可选）</td><td>同上</td><td><code>11.Pitch</code> / <code>11.Formant</code></td><td><code>&lt;音频&gt;/measure/</code></td></tr>
+    <tr><td>7</td><td>后台后处理</td><td>out.tsv</td><td>补 SHR、剔列、舍入</td><td>原地改 out.tsv</td></tr>
+    <tr><td>8</td><td>后台 <code>results.py</code></td><td>out.tsv</td><td>前 200 行 + 检出率 + 诊断</td><td>内存 → 界面</td></tr>
+    <tr><td>9</td><td>九宫格</td><td>measure/ 里的对象</td><td>9 个文件的曲线 JSON</td><td>内存 → 界面</td></tr>
+    <tr><td>10</td><td>审核落盘</td><td>你的修正点</td><td>改写后的 <code>.Pitch</code></td><td><code>&lt;音频&gt;/measure/</code></td></tr>
+    <tr><td>11</td><td>导出</td><td>out.tsv + 对象文件</td><td>CSV / XLSX</td><td>你选的输出目录</td></tr>
+  </tbody>
+</table>
+
+<h3>12.1 三个"回流"</h3>
+<p>上面这条线不是单向的，有三处会往回走：</p>
+
+<ol>
+  <li><b>诊断 → 参数</b>：第 3 步的检出率告诉你"基频上限太低"，你回到第 2 步改参数再跑。这是最常见的一次回流。</li>
+  <li><b>审核 → 批量</b>：第 4 步人工修正后的对象存进 measure/，下次批量勾上"复用中间文件"，Praat 就不再重算。这条回流是"审完不用重来"的关键。</li>
+  <li><b>导出 → 批量</b>：导出时发现 F4/F5 是空的，说明当初没勾；回第 2 步勾上重跑。</li>
+</ol>
+
+<div class="box metaphor">
+  <span class="t">比喻</span>
+  这不是一条传送带，而是一个<b>带返工的车间</b>：
+  粗加工（批量）→ 质检（诊断）→ 精修（审核）→ 出厂（导出）。
+  精修过的零件放回半成品库（measure/），下一批直接取用，不用重新铸造。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="patterns">13. 可以偷学的 12 个工程套路</h2>
+
+<p>这一节是给"想借这个项目提升代码水平"的读者准备的。每条都能在代码里找到对应位置。</p>
+
+<table>
+  <thead><tr><th style="width:4%">#</th><th style="width:20%">套路</th><th style="width:26%">在哪</th><th>解决什么问题</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td><b>单一事实源</b></td><td>params_schema.py</td><td>同一份信息只写一次，避免"界面有、CSV 没有"的不一致</td></tr>
+    <tr><td>2</td><td><b>外壳不碰算法</b></td><td>整个 ps-shell/</td><td>上游脚本可独立升级；出了计算问题不用怀疑外壳</td></tr>
+    <tr><td>3</td><td><b>中间产物落盘</b></td><td>measure/</td><td>断点续跑、人工审核、导出复用，三件事一次解决</td></tr>
+    <tr><td>4</td><td><b>用文件传进度</b></td><td>ps_progress.txt</td><td>绕开管道缓冲，让长任务有实时反馈</td></tr>
+    <tr><td>5</td><td><b>新鲜度校验</b></td><td><code>mtime &gt; started</code></td><td>区分"这次生成的"和"上次留下的"，防止静默成功</td></tr>
+    <tr><td>6</td><td><b>逐项回退而非整体失败</b></td><td>get_times.praat</td><td>一个文件没标注，不该让整批任务失败</td></tr>
+    <tr><td>7</td><td><b>缺失值有独立表示</b></td><td>zeroPadding.praat</td><td>不让"没测到"污染"测到 0"</td></tr>
+    <tr><td>8</td><td><b>路径口径只定义一次</b></td><td>review_export.measure_dir / object_path</td><td>避免同一个文件被两处代码算成两个路径</td></tr>
+    <tr><td>9</td><td><b>兼容旧数据</b></td><td>normalize_legacy_formants 等</td><td>用户的老 params.csv 不会因为升级就失效</td></tr>
+    <tr><td>10</td><td><b>报错说人话</b></td><td>errors_i18n.py</td><td>把 "Not completed" 翻译成"基频范围可能设错了"</td></tr>
+    <tr><td>11</td><td><b>多级兜底</b></td><td>窗口 → Edge → 浏览器</td><td>在别人的电脑上也能跑起来</td></tr>
+    <tr><td>12</td><td><b>测试不依赖真 Praat</b></td><td>tests/ 全部 mock</td><td>改代码时能秒级验证，不用等一次真实批处理</td></tr>
+  </tbody>
+</table>
+
+<h3>13.1 如果只学三条</h3>
+<ol>
+  <li><b>单一事实源</b>：凡是"同一件事写在两个地方"的设计，迟早会不一致。把它合并成一处，是投入产出比最高的重构。</li>
+  <li><b>用独立证据验证结果</b>：不要相信"进程退出码 0"、"文件存在"、"接口返回 200"。要找一个<b>只有成功才会出现</b>的证据（文件修改时间、行数、检出率）。</li>
+  <li><b>缺失值要有自己的表示</b>：0、空字符串、NULL 混用，是数据类 bug 的第一大来源。</li>
+</ol>
+
+<!-- ============================================================ -->
+<h2 id="route">14. 代码导读路线</h2>
+
+<p>如果你真的想读这个项目的代码，建议按下面的顺序。每一步都标了"看什么、跳过什么"，避免一上来就被 1700 行的文件劝退。</p>
+
+<table>
+  <thead><tr><th style="width:5%">步</th><th style="width:26%">文件</th><th>看什么</th><th style="width:20%">可以跳过</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td class="file">ps-shell/README.md</td><td>五步流程、目录结构、已知问题</td><td>—</td></tr>
+    <tr><td>2</td><td class="file">backend/params_schema.py</td><td>前 120 行：GROUPS / TIERS / 前几条 PARAMS，理解"参数即数据"</td><td>后面 700 行参数定义（用的时候再查）</td></tr>
+    <tr><td>3</td><td class="file">backend/params_io.py</td><td><code>build_csv</code> + <code>_normalize</code>（前 95 行）</td><td>后半段的导入解析</td></tr>
+    <tr><td>4</td><td class="file">backend/server.py</td><td><code>_prepare</code> + <code>_execute</code>（200–625 行），这是整个后台的心脏</td><td>HTTP 路由部分（900–1350 行）先跳过</td></tr>
+    <tr><td>5</td><td class="file">backend/praat.py</td><td><code>run_script</code>：怎么起进程、怎么解码、怎么取消</td><td>探测 praat.exe 的部分</td></tr>
+    <tr><td>6</td><td class="file">scripts/praatSauce.praat</td><td>主循环（110–490 行）：两层 for、@times、八种测量、对齐</td><td>开头 50 行许可声明</td></tr>
+    <tr><td>7</td><td class="file">scripts/zeroPadding.praat</td><td>全文件只有 54 行，是"缺失值处理"的教科书级例子</td><td>—</td></tr>
+    <tr><td>8</td><td class="file">backend/results.py</td><td><code>column_stats</code> + <code>diagnose</code>：统计口径怎么定</td><td><code>drop_columns</code> / <code>round_result</code> 的实现细节</td></tr>
+    <tr><td>9</td><td class="file">backend/review_grid.py</td><td>只看 <code>build_grid</code> 的前 100 行：怎么组织一页数据</td><td>后面所有 FormantPath 相关代码</td></tr>
+    <tr><td>10</td><td class="file">ps-shell/tests/</td><td>挑 <code>test_results_diag.py</code> 看：怎么在不装 Praat 的情况下测逻辑</td><td>—</td></tr>
+  </tbody>
+</table>
+
+<h3>14.1 读代码时的三个提问</h3>
+<p>每读一个函数，问自己三句，比从头到尾看一遍有效得多：</p>
+<ol>
+  <li><b>它的输入是什么？输出是什么？</b>（签名）</li>
+  <li><b>如果这一步失败，后面的哪一步会受影响？</b>（依赖链）</li>
+  <li><b>作者为什么不用更简单的写法？</b>（通常注释里就写着答案——这个项目的注释密度很高，而且大多在解释"为什么"，不是"是什么"）</li>
+</ol>
+
+<div class="box note">
+  <span class="t">这个项目的注释风格值得学</span>
+  它很少写"这里给 f0min 赋值"，而是写"2026-09-27 方案 A：中间结果统一进 measure/ 子目录，
+  因为 Praat 不能建目录，Python 侧已 ensure 过"。
+  这种注释记录的是<b>决策和踩坑</b>，半年后回来看还能救命。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="issues">15. 读代码发现的两处值得注意</h2>
+
+<p>按你的习惯，我把读代码时看到的疑点如实列出来，没有擅自修改。</p>
+
+<h3>15.1 源码态下，审核落盘可能找不到脚本</h3>
+<p class="file">ps-shell/backend/review_export.py 第 42–48 行</p>
+
+<pre class="code">if settings.IS_FROZEN:
+    SCRIPT = os.path.join(settings.APP_BASE, "scripts", "review_export.praat")
+else:
+    SCRIPT = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "praat", "review_export.praat",
+    )
+</pre>
+
+<p><code>os.path.dirname(os.path.dirname(__file__))</code> 是 <code>ps-shell/</code>，所以源码态拼出来的是 <code>ps-shell/praat/review_export.praat</code>。但仓库里<b>没有 <code>ps-shell/praat/</code> 这个目录</b>，脚本实际在仓库根的 <code>scripts/</code> 下。</p>
+
+<p>冻结态（打包后）是正确的：<code>APP_BASE/scripts/</code>。所以这个问题只在"源码态直接跑、并且点了审核落盘"时出现。</p>
+
+<p>建议的修法（未改）：让它和别处一致，走 <code>settings.resolve_script_dir()</code>，或者非冻结态指向 <code>&lt;仓库根&gt;/scripts/</code>。</p>
+
+<h3>15.2 生成的 params.csv 比上游多 40 行</h3>
+<p><code>params_schema.PARAMS</code> 有 97 条定义，去掉 1 个纯外壳概念后，实际写进 <code>params.csv</code> 的是 96 行；而上游自带的 <code>params.csv</code> 只有 56 行参数。</p>
+
+<p>多出来的是界面用的"原子列"（比如 <code>ha_h1c</code>、<code>sl_h1h2c</code>），Praat 侧按名字查表，用不到就忽略，<b>不影响结果</b>。副作用只有一个：文件更长，排查时容易误以为"参数变多了"。</p>
+
+<p>如果要收紧，可以给这些原子列加 <code>shell_only=True</code>，让 <code>build_csv</code> 跳过它们。这属于优化，不是 bug。</p>
+
+<div class="box key">
+  <span class="t">为什么把这两条写出来</span>
+  读别人的代码，最容易犯的错是"看到不一致就以为是 bug"，或者反过来"跑通了就以为都对"。
+  这两条一条是真实缺陷（限定在源码态），一条只是冗余。
+  分清这两类，比找出问题本身更重要。
+</div>
+
+<!-- ============================================================ -->
+<h2 id="glossary">16. 小词典</h2>
+
+<table>
+  <thead><tr><th style="width:22%">词</th><th>在这套系统里指什么</th></tr></thead>
+  <tbody>
+    <tr><td><code>params.csv</code></td><td>两层之间唯一的接口。三列：变量名、值、注释。Praat 按名字查表读取。</td></tr>
+    <tr><td><code>.Pitch</code> / <code>.Formant</code></td><td>Praat 的对象文件（文本格式），存的是逐帧的基频/共振峰。既是中间产物，也是审核对象。</td></tr>
+    <tr><td><code>measure/</code></td><td>放对象文件的子目录，位于每个音频所在目录下。整条流水线的"半成品库"。</td></tr>
+    <tr><td><code>out.tsv</code></td><td>批量测量的汇总表，制表符分隔，一行 = 一帧。R/Python 可直接读。</td></tr>
+    <tr><td>TextGrid</td><td>Praat 的标注文件。这套系统用它决定"一段录音要测哪几刀"。</td></tr>
+    <tr><td>检出率</td><td>有值的帧 ÷ 有效语音帧。判断参数是否合适的第一指标。</td></tr>
+    <tr><td>ceiling（上限）</td><td>基频上限 / 共振峰上限。设低了会漏，设高了会引入噪声。</td></tr>
+    <tr><td>LPC 阶数</td><td>= 2 × 共振峰数量。数量选错，F1/F2 会糊在一起。</td></tr>
+    <tr><td>undefined</td><td>"这一帧没测到"。文件里写作 <code>--undefined--</code>，统计时跳过，与 0 严格区分。</td></tr>
+    <tr><td>试跑（preview）</td><td>只跑一个文件，用来确认参数。结果写在临时目录，不污染正式输出。</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<p style="color:#7b8794; font-size:13.5px; text-align:center; margin-top:34px">
+这份教程依据当前仓库代码整理。若后续版本调整了流程，以代码注释里的日期与说明为准——<br>
+这个项目的注释会记录"哪一天、因为什么、改成了什么"，比文档更可靠。
+</p>
+
+</main>
+</div>
+</body>
+</html>
