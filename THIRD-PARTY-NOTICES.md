@@ -151,3 +151,58 @@ Praat 自身还打包了一些第三方库（如 FLAC、mp3、portaudio 等）�
 目录内的 `README.md` 与 `REFERENCES.md` 记录了完整来源、校验和，以及另外三份
 **未下载**语料（Iivonen 1991、Becker-Kristal 2010 等）的出处——它们没有公开可下载的
 数据文件，仅供日后追溯线索。
+
+---
+
+## 5. VoiceSauce（算法语义来源，不含其代码）
+
+本软件 VoiceSauce 页面的测量参数约定、算法行为与输出列名对齐
+VoiceSauce v1.37（UCLA Phonetics Lab / SPAPL）：
+
+> Shue, Y.-L., Keating, P., Vicenik, C., & Yu, K. (2011).
+> VoiceSauce: A program for voice analysis. *ICPhS XVII*, 1846–1849.
+> <https://www.phonetics.ucla.edu/voicesauce/>
+
+VoiceSauce 的 MATLAB 源码 © UCLA SPAPL，**未随本软件分发、未包含或逐字翻译**。
+本软件为独立的 Python（NumPy/SciPy）重实现，与 UCLA 无隶属或背书关系。
+
+## 6. OpenSauce（opensauce-python）— Apache License 2.0
+
+部分模块（SHR/SHRP、F0 引擎包装、谐波幅度校正与带宽映射）改编自 OpenSauce：
+<https://github.com/voicesauce/opensauce-python>
+
+> Copyright 2017-2019 Terri M. Yu, R. David Murray, Kate Silverstein,
+> Kristine M. Yu. Licensed under the Apache License, Version 2.0
+> （全文见 `LICENSES/Apache-2.0.txt`）。
+
+引用：doi:10.5281/zenodo.2638411。**本软件对这些代码做了修改**（改动逐条记于
+各 vendored 文件头的 "Modified for PraatSauce Shell v2" 清单）。对应模块
+（`ps-shell-v2/backend/pysauce/_vendor/osp_*.py`）文件头均含 attribution 声明。
+
+## 7. Snack Sound Toolkit — GNU GPL v2 or later
+
+`vendor/snack.exe` 构建自 Snack（© 1997-2005 Jonas Beskow & Kåre Sjölander,
+KTH；部分文件 © AT&T / Entropic Research Laboratory, BSD 许可）。
+
+- 源码：<https://www.speech.kth.se/snack/>
+  （Debian 镜像：<https://sources.debian.org/src/snack/>）
+
+按 GPL-2+ 随包分发，许可全文见 `LICENSES/GPL-2.0.txt`。
+本软件与 Snack 之间仅以命令行子进程方式调用（聚合），不构成衍生作品。
+
+> 说明：2.0 的 Snack 计算实际由 `ps-shell-v2/backend/pysauce/engines/snack_sim.py`
+> 以纯 Python（RAPT 基频 + LPC 共振峰）算法复刻实现，**不依赖该 exe**；此条目保留
+> 用于分发合规与对拍说明。
+
+## 8. fminsearchbnd — BSD 2-Clause
+
+有界优化变换参考 John D'Errico 的 fminsearchbnd（MATLAB File Exchange #8277），
+© 2006 John D'Errico，BSD-2-Clause（全文见 `LICENSES/BSD-2-Clause.txt`）。
+本软件按公开的变换思想独立复刻（`ps-shell-v2/backend/pysauce/fminsearchbnd.py`），
+不含 MATLAB 源码。
+
+## 9. pylstraight — Apache License 2.0（若打包）
+
+legacy-STRAIGHT 的 Python 复现：<https://github.com/takenori-y/pylstraight>，
+Apache-2.0。注：为 **legacy-STRAIGHT 近似，非 TANDEM-STRAIGHT 等价实现**。
+本软件仅在 STRAIGHT 引擎路径下调用之。

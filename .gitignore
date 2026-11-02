@@ -94,3 +94,5 @@ PraatSauceShell/settings_frozen.json
 ps-shell/_tk/
 ps-shell/vs_ref/
 ps-shell/vs_source/
+refs/
+ps-shell-v2/vendor/*.exe

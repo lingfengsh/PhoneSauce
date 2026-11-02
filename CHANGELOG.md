@@ -2,6 +2,20 @@
 
 版本号规则：大版本不动，小版本 +1（`1.0 → 1.1 → 1.2 → …`）。
 
+## 2.0.0 — 2026-11-02
+
+更名与多引擎大版本。
+
+- 产品更名为 **PhoneSauce 嗓音分析助手**（原工作名 PraatSauce 助手）；仓库由 `praatsauce-shell` 更名为 `PhoneSauce`。
+- 引入多引擎：Praat / pysauce（按论文独立实现 VoiceSauce v1.37 核心算法）/ Snack（RAPT·LPC 复刻）/ STRAIGHT（legacy 近似）/ 外部文件；F0 与共振峰的基准引擎可分别指定并横向比较。
+- 新增 VoiceSauce 风格界面（`vs.html`），与向导界面（`index.html`）通过 `launch.html` 选择。
+- 向导第三步重构：基准引擎卡下移、试跑折叠进运行前检查；修复"审核完成后基准仍灰 / 基准被自动顶替"等问题。
+- 修复参数展示取数来源（不再依赖 output/，按基准引擎识别 `.Pitch`/`.Formant`/`.sF0`/`.strF0` 等对象）。
+- 修复 Manual Data 按引擎列覆盖（Praat 滑块重抽；Snack/STRAIGHT 走导入数据列）。
+- 合规：pysauce 依赖的 Apache-2.0 / BSD-2-Clause 许可证全文入 `LICENSES/`；明确声明非 VoiceSauce 移植、复刻引擎须注明引用。
+
+**发布信息**：GitHub tag `v2.0.0`；概念 DOI [`10.5281/zenodo.23463195`](https://doi.org/10.5281/zenodo.23463195)（全部版本，不变）；2.0 版本 DOI 待 Release 后由 Zenodo 生成。
+
 ## 1.2 — 2026-10-19
 
 面向"冻结一版给别人用"的发布版，主要是把测量语义和交互细节收干净。

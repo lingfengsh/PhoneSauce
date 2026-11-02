@@ -9,16 +9,17 @@
 # ============================================================================
 cff-version: 1.2.0
 message: "If you use this software in your research, please cite it as below."
-title: "PraatSauce 助手：面向中文用户的语音声学参数提取工作台"
+title: "PhoneSauce 嗓音分析助手：多引擎中文嗓音（发声态）声学分析工具"
 abstract: >-
-  一套围绕 Praat 引擎的语音声学分析图形界面，用于批量提取基频、共振峰、
-  谐波幅度差、HNR、CPP、SHR、SoE 等 50 余项声学指标。提供五步向导、
-  试跑体检、九宫格人工审核与结构化导出，面向语言学、语音学、方言与
-  发声态研究。声学计算全部由本机 Praat 完成，本程序仅负责参数配置、
-  批量调度与结果呈现。
+  一套中文、零编程门槛的嗓音（发声态）声学分析工具，多引擎（Praat /
+  pysauce 按论文独立实现 VoiceSauce v1.37 核心算法 / Snack RAPT·LPC 复刻 /
+  STRAIGHT 近似 / 外部文件）批量提取基频、共振峰、谐波幅度差、HNR、CPP、
+  SHR、SoE、能量等 60 余项指标。提供向导与 VoiceSauce 风格两套界面、试跑体检、
+  九宫格人工审核与结构化导出，面向语言学、语音学、方言与发声态研究，
+  Windows 平台离线可用。
 type: software
-version: "1.2.0"
-date-released: "2026-10-19"
+version: "2.0.0"
+date-released: "2026-11-02"
 license: MIT
 
 authors:
@@ -31,8 +32,8 @@ authors:
 #  - name: "零"
 #    orcid: "https://orcid.org/0000-0000-0000-0000"
 
-repository-code: "https://github.com/lingfengsh/praatsauce-shell"
-url: "https://github.com/lingfengsh/praatsauce-shell"
+repository-code: "https://github.com/lingfengsh/PhoneSauce"
+url: "https://github.com/lingfengsh/PhoneSauce"
 
 keywords:
   - phonetics
