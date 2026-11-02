@@ -22,9 +22,12 @@ Praat手册.epub
 # 示例数据与测量派生对象
 #   samples/ 为程序合成音频，体积大且可随时重新生成：
 #     python ps-shell/tools/make_samples.py
-#   派生对象（Praat 中间结果）同理，不进库。
+#   派生对象（Praat 中间结果 .Pitch/.Formant/.TextGrid）同理，不进库。
+#   例外：ps-shell-v2/samples/ 内的 .wav 作为演示测试样本入库
+#         （仅 wav；.Pitch/.Formant/.TextGrid 等分析产物仍按下方全局规则忽略）。
 # ============================================================
 samples/
+!ps-shell-v2/samples/
 *.Pitch
 *.Formant
 *.TextGrid
